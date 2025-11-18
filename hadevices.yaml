@@ -1,0 +1,282 @@
+# Home Assistant Configuration
+# configuration.yaml
+
+homeassistant:
+  name: My Smart Home
+  latitude: 25.2048
+  longitude: 55.2708
+  elevation: 0
+  unit_system: metric
+  time_zone: Asia/Dubai
+
+# Lights
+light:
+  - platform: template
+    lights:
+      living_room_light:
+        friendly_name: "Living Room Light"
+        unique_id: light_living
+        value_template: "{{ states('input_select.living_light_mode') != 'off' }}"
+        turn_on:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.living_light_mode
+          data:
+            option: warm_white
+        turn_off:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.living_light_mode
+          data:
+            option: "off"
+        set_color:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.living_light_mode
+          data:
+            option: "{{ color_mode }}"
+      
+      bedroom_light:
+        friendly_name: "Bedroom Light"
+        unique_id: light_bedroom
+        value_template: "{{ states('input_select.bedroom_light_mode') != 'off' }}"
+        turn_on:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.bedroom_light_mode
+          data:
+            option: warm_white
+        turn_off:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.bedroom_light_mode
+          data:
+            option: "off"
+
+# Climate (AC)
+climate:
+  - platform: generic_thermostat
+    name: Living Room AC
+    unique_id: ac_living
+    heater: switch.living_ac_heater
+    target_sensor: sensor.living_temperature
+    min_temp: 18
+    max_temp: 28
+    target_temp: 22
+    cold_tolerance: 0.5
+    hot_tolerance: 0.5
+    initial_hvac_mode: "cool"
+
+# Media Player (TV)
+media_player:
+  - platform: template
+    media_players:
+      living_room_tv:
+        friendly_name: "Living Room TV"
+        unique_id: tv_living
+        value_template: "{{ states('input_select.tv_channel') != 'Off' }}"
+        turn_on:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.tv_channel
+          data:
+            option: News
+        turn_off:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.tv_channel
+          data:
+            option: "Off"
+        select_source:
+          service: input_select.select_option
+          target:
+            entity_id: input_select.tv_channel
+          data:
+            option: "{{ source }}"
+
+# Lock
+lock:
+  - platform: template
+    name: Bedroom Door Lock
+    unique_id: door_bedroom
+    value_template: "{{ is_state('input_boolean.bedroom_door_locked', 'on') }}"
+    lock:
+      service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.bedroom_door_locked
+    unlock:
+      service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.bedroom_door_locked
+
+# Input Helpers
+input_select:
+  living_light_mode:
+    name: Living Room Light Mode
+    options:
+      - "off"
+      - warm_white
+      - bright_yellow
+      - cool_blue
+    initial: "off"
+    icon: mdi:lightbulb
+  
+  bedroom_light_mode:
+    name: Bedroom Light Mode
+    options:
+      - "off"
+      - warm_white
+      - bright_yellow
+      - cool_blue
+    initial: warm_white
+    icon: mdi:lightbulb
+  
+  tv_channel:
+    name: TV Channel
+    options:
+      - "Off"
+      - News
+      - Cartoon
+      - Sports
+      - Movies
+    initial: Movies
+    icon: mdi:television
+
+input_boolean:
+  bedroom_door_locked:
+    name: Bedroom Door Lock
+    initial: off
+    icon: mdi:lock
+
+input_number:
+  living_ac_temperature:
+    name: Living AC Temperature
+    min: 18
+    max: 28
+    step: 1
+    initial: 22
+    unit_of_measurement: "°C"
+    icon: mdi:thermometer
+
+switch:
+  - platform: template
+    switches:
+      living_ac_heater:
+        friendly_name: "Living AC Power"
+        value_template: "{{ is_state('input_boolean.living_ac_on', 'on') }}"
+        turn_on:
+          service: input_boolean.turn_on
+          target:
+            entity_id: input_boolean.living_ac_on
+        turn_off:
+          service: input_boolean.turn_off
+          target:
+            entity_id: input_boolean.living_ac_on
+
+input_boolean:
+  living_ac_on:
+    name: Living AC Power
+    initial: on
+    icon: mdi:air-conditioner
+
+# Sensors
+sensor:
+  - platform: template
+    sensors:
+      living_temperature:
+        friendly_name: "Living Room Temperature"
+        unit_of_measurement: "°C"
+        value_template: "{{ states('input_number.living_ac_temperature') }}"
+
+# Scenes
+scene:
+  - name: Movie Mode
+    entities:
+      light.living_room_light:
+        state: off
+      media_player.living_room_tv:
+        state: on
+        source: Movies
+      climate.living_room_ac:
+        state: cool
+        temperature: 22
+  
+  - name: Sleep Mode
+    entities:
+      light.living_room_light:
+        state: off
+      light.bedroom_light:
+        state: off
+      media_player.living_room_tv:
+        state: off
+      lock.bedroom_door_lock:
+        state: locked
+  
+  - name: Away Mode
+    entities:
+      light.living_room_light:
+        state: off
+      light.bedroom_light:
+        state: off
+      media_player.living_room_tv:
+        state: off
+      climate.living_room_ac:
+        state: off
+      lock.bedroom_door_lock:
+        state: locked
+  
+  - name: Morning Mode
+    entities:
+      light.living_room_light:
+        state: on
+        color_mode: bright_yellow
+      light.bedroom_light:
+        state: on
+        color_mode: warm_white
+      media_player.living_room_tv:
+        state: on
+        source: News
+      lock.bedroom_door_lock:
+        state: unlocked
+
+# Automations
+automation:
+  - alias: "Activate Movie Scene"
+    trigger:
+      - platform: state
+        entity_id: input_boolean.movie_mode
+        to: "on"
+    action:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.movie_mode
+  
+  - alias: "Activate Sleep Scene"
+    trigger:
+      - platform: time
+        at: "22:00:00"
+    action:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.sleep_mode
+  
+  - alias: "Activate Morning Scene"
+    trigger:
+      - platform: time
+        at: "07:00:00"
+    action:
+      - service: scene.turn_on
+        target:
+          entity_id: scene.morning_mode
+
+# Lovelace Dashboard
+lovelace:
+  mode: yaml
+  resources: []
+  dashboards:
+    lovelace-home:
+      mode: yaml
+      title: Smart Home
+      icon: mdi:home
+      show_in_sidebar: true
+      filename: ui-lovelace.yaml

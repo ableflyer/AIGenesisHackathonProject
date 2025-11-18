@@ -1,0 +1,163 @@
+# ui-lovelace.yaml
+# Lovelace Dashboard Configuration
+
+title: My Smart Home
+views:
+  - title: Living Room
+    path: living
+    icon: mdi:sofa
+    cards:
+      - type: entities
+        title: Living Room
+        entities:
+          - entity: light.living_room_light
+            name: Light
+            secondary_info: last-changed
+          - entity: input_select.living_light_mode
+            name: Light Mode
+          - entity: climate.living_room_ac
+            name: Air Conditioner
+          - entity: input_number.living_ac_temperature
+            name: AC Temperature
+          - entity: media_player.living_room_tv
+            name: TV
+          - entity: input_select.tv_channel
+            name: TV Channel
+      
+      - type: picture-elements
+        image: /local/floorplan_living.png
+        elements:
+          - type: state-icon
+            entity: light.living_room_light
+            style:
+              top: 20%
+              left: 20%
+          - type: state-icon
+            entity: climate.living_room_ac
+            style:
+              top: 20%
+              left: 80%
+          - type: state-icon
+            entity: media_player.living_room_tv
+            style:
+              top: 60%
+              left: 50%
+  
+  - title: Bedroom
+    path: bedroom
+    icon: mdi:bed
+    cards:
+      - type: entities
+        title: Bedroom
+        entities:
+          - entity: light.bedroom_light
+            name: Light
+            secondary_info: last-changed
+          - entity: input_select.bedroom_light_mode
+            name: Light Mode
+          - entity: lock.bedroom_door_lock
+            name: Door Lock
+      
+      - type: picture-elements
+        image: /local/floorplan_bedroom.png
+        elements:
+          - type: state-icon
+            entity: light.bedroom_light
+            style:
+              top: 30%
+              left: 20%
+          - type: state-icon
+            entity: lock.bedroom_door_lock
+            style:
+              top: 30%
+              left: 90%
+  
+  - title: Scenes
+    path: scenes
+    icon: mdi:palette
+    cards:
+      - type: button
+        name: Movie Mode
+        icon: mdi:movie
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.movie_mode
+      
+      - type: button
+        name: Sleep Mode
+        icon: mdi:sleep
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.sleep_mode
+      
+      - type: button
+        name: Away Mode
+        icon: mdi:lock
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.away_mode
+      
+      - type: button
+        name: Morning Mode
+        icon: mdi:weather-sunny
+        tap_action:
+          action: call-service
+          service: scene.turn_on
+          service_data:
+            entity_id: scene.morning_mode
+      
+      - type: entities
+        title: Quick Controls
+        entities:
+          - type: button
+            name: All Lights On
+            icon: mdi:lightbulb-on
+            tap_action:
+              action: call-service
+              service: light.turn_on
+              service_data:
+                entity_id:
+                  - light.living_room_light
+                  - light.bedroom_light
+          
+          - type: button
+            name: All Lights Off
+            icon: mdi:lightbulb-off
+            tap_action:
+              action: call-service
+              service: light.turn_off
+              service_data:
+                entity_id:
+                  - light.living_room_light
+                  - light.bedroom_light
+  
+  - title: All Devices
+    path: all
+    icon: mdi:home-automation
+    cards:
+      - type: entities
+        title: All Devices
+        show_header_toggle: false
+        entities:
+          - type: section
+            label: Lights
+          - entity: light.living_room_light
+          - entity: light.bedroom_light
+          
+          - type: section
+            label: Climate
+          - entity: climate.living_room_ac
+          
+          - type: section
+            label: Media
+          - entity: media_player.living_room_tv
+          
+          - type: section
+            label: Security
+          - entity: lock.bedroom_door_lock

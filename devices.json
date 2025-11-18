@@ -51,7 +51,7 @@
         100,
         60
       ],
-      "channel": 4,
+      "channel": 2,
       "channels": [
         {
           "id": 0,
@@ -92,7 +92,7 @@
         50,
         50
       ],
-      "state": 1,
+      "state": 0,
       "color_modes": [
         "off",
         "warm_white",
@@ -112,7 +112,7 @@
         60,
         60
       ],
-      "locked": true
+      "locked": false
     }
   ],
   "rooms": [

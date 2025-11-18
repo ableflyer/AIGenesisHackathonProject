@@ -1,7 +1,16 @@
 import os
 import json
 import re
-from langchain_community.llms import Ollama
+import getpass
+import os
+from langchain_google_genai import ChatGoogleGenerativeAI
+from dotenv import load_dotenv
+load_dotenv()
+
+if "GOOGLE_API_KEY" not in os.environ:
+    os.environ["GOOGLE_API_KEY"] = getpass.getpass("Enter your Google AI API key: ")
+
+
 
 # Path to JSON file
 json_path = "devices.json"
@@ -11,11 +20,13 @@ if not os.path.exists(json_path):
     print(f"Error: File '{json_path}' not found.")
     exit(1)
 
-# ⚡ FAST MODEL - Choose one:
-# qwen2.5:0.5b (fastest), llama3.2:1b (good balance), or home-3b-v2
-llm = Ollama(
-    model="fixt/home-3b-v2:latest",  # Change to "qwen2.5:0.5b" for maximum speed
-    temperature=0
+llm = ChatGoogleGenerativeAI(
+    model="gemini-2.5-flash",
+    temperature=0,
+    max_tokens=None,
+    timeout=None,
+    max_retries=2,
+    # other params...
 )
 
 # Preload JSON into memory (only load once!)
@@ -362,7 +373,14 @@ def home_agent_main(data, question):
     full_prompt = f"{system_prompt}\n\nUser: {question}\nAssistant:"
     
     # Get LLM response (⚡ FAST!)
-    answer = llm.invoke(full_prompt)
+    # LangChain LLMs typically support being called directly. Different versions may
+    # return a plain string or a richer object; handle both safely.
+    llm_response = llm.invoke(full_prompt)
+    if isinstance(llm_response, str):
+        answer = llm_response
+    else:
+        # Try common attributes that may contain the returned text
+        answer = getattr(llm_response, 'text', None) or getattr(llm_response, 'content', None) or str(llm_response)
     print(answer)
     
     # Parse and apply changes

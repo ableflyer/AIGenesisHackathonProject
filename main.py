@@ -16,7 +16,7 @@ json_path = "devices.json"
 last_modified = os.path.getmtime(json_path)
 
 def load_devices():
-    with open(json_path, "r") as f:
+    with open("/assets/"+json_path, "r") as f:
         return json.load(f)
 
 def check_for_updates():
@@ -96,7 +96,7 @@ def near(player, rect, distance=60):
                                          rect.centery - distance < py < rect.centery + distance)
 
 def save_json():
-    with open(json_path, "w") as f:
+    with open("/assets/"+json_path, "w") as f:
         json.dump({"gadgets": list(gadgets.values()), "rooms": data["rooms"]}, f, indent=2)
 
 
@@ -227,4 +227,5 @@ async def main():
         pygame.display.flip()
         await asyncio.sleep(0)  # Allow other tasks to run
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())

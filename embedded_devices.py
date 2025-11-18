@@ -1,4 +1,4 @@
-{
+data = {
   "gadgets": [
     {
       "id": "light_living",
@@ -32,7 +32,7 @@
         60,
         60
       ],
-      "on": true,
+      "on": True,
       "temperature": 20,
       "range": [
         18,
@@ -112,7 +112,7 @@
         60,
         60
       ],
-      "locked": true
+      "locked": True
     }
   ],
   "rooms": [
